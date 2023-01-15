@@ -21,15 +21,29 @@ let initializeDBandServer = async () => {
   }
 };
 initializeDBandServer();
-
+//convert dbresult from snakecase to camelCase
+const getdbresultAndConvertToCamelCase = (player) => {
+  return {
+    playerId: player.player_id,
+    playerName: player.player_name,
+    jerseyNumber: player.jersey_name,
+    role: player.role,
+  };
+};
+//get all players details from database
 app.get("/players/", async (request, response) => {
   const selectQuery = `select
     * from 
     cricket_team`;
   const result = await db.all(selectQuery);
-  response.send(result);
+  response.send(
+    result.map((eachPlayer) => {
+      getdbresultAndConvertToCamelCase(eachPlayer);
+    })
+  );
 });
 
+//get required player details from database
 app.get("/players/:playerId/", async (request, response) => {
   const { playerId } = request.params;
   const selectQuery = `select 
@@ -42,6 +56,7 @@ app.get("/players/:playerId/", async (request, response) => {
   response.send(result);
 });
 
+//create a new player details in the database
 app.post("/players/", async (request, response) => {
   const playerDetails = request.body;
   const { playerName, jerseyNumber, role } = playerDetails;
@@ -60,7 +75,7 @@ app.post("/players/", async (request, response) => {
   response.send("Player Added to Team");
 });
 
-//Update a player in the Database
+//Update a player details in the Database
 app.put("/players/:playerId/", async (request, response) => {
   const playerId = request.params;
   const newData = request.body;
@@ -75,7 +90,7 @@ app.put("/players/:playerId/", async (request, response) => {
   response.send("Player Details Updated");
 });
 
-//Delete a player from the Database
+//Delete a player details from the Database
 app.delete("/players/:playerId/", async (request, response) => {
   const { playerId } = request.params;
   const deleteQuery = `delete
