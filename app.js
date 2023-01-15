@@ -37,21 +37,17 @@ app.get("/players/", async (request, response) => {
     cricket_team`;
   const result = await db.all(selectQuery);
   response.send(
-    result.map((eachPlayer) => {
-      getdbresultAndConvertToCamelCase(eachPlayer);
-    })
+    result.map((eachPlayer) => getdbresultAndConvertToCamelCase(eachPlayer))
   );
 });
 
 //get required player details from database
 app.get("/players/:playerId/", async (request, response) => {
   const { playerId } = request.params;
-  const selectQuery = `select 
-    * 
-    from 
-    cricket_team 
-    where 
-    player_id = ${playerId};`;
+  const selectQuery = `
+    select * 
+    from cricket_team 
+    where player_id = ${playerId}`;
   const result = await db.get(selectQuery);
   response.send(result);
 });
