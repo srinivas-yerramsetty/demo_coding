@@ -26,7 +26,7 @@ const getdbresultAndConvertToCamelCase = (player) => {
   return {
     playerId: player.player_id,
     playerName: player.player_name,
-    jerseyNumber: player.jersey_name,
+    jerseyNumber: player.jersey_number,
     role: player.role,
   };
 };
@@ -41,6 +41,15 @@ app.get("/players/", async (request, response) => {
   );
 });
 
+//convert_snake_case to camelCase
+const snake_case_to_camelCase = (result) => {
+  return {
+    playerId: result.player_id,
+    playerName: result.player_name,
+    jerseyNumber: result.jersey_number,
+    role: result.role,
+  };
+};
 //get required player details from database
 app.get("/players/:playerId/", async (request, response) => {
   const { playerId } = request.params;
@@ -49,7 +58,7 @@ app.get("/players/:playerId/", async (request, response) => {
     from cricket_team 
     where player_id = ${playerId}`;
   const result = await db.get(selectQuery);
-  response.send(result);
+  response.send(snake_case_to_camelCase(result));
 });
 
 //create a new player details in the database
@@ -73,7 +82,7 @@ app.post("/players/", async (request, response) => {
 
 //Update a player details in the Database
 app.put("/players/:playerId/", async (request, response) => {
-  const playerId = request.params;
+  const { playerId } = request.params;
   const newData = request.body;
   const { playerName, jerseyNumber, role } = newData;
   const updateQuery = `update 
@@ -81,7 +90,7 @@ app.put("/players/:playerId/", async (request, response) => {
     set 
     player_name = "${playerName}",
     jersey_number = ${jerseyNumber},
-    role = "${role}";`;
+    role = "${role}" where player_id = ${playerId};`;
   await db.run(updateQuery);
   response.send("Player Details Updated");
 });
@@ -95,6 +104,6 @@ app.delete("/players/:playerId/", async (request, response) => {
   where 
   player_id = ${playerId};`;
   await db.run(deleteQuery);
-  response.send("player Removed");
+  response.send("Player Removed");
 });
 module.exports = app;
